@@ -1,0 +1,64 @@
+erDiagram
+    %% =====================================================================
+    %% Library Management System Entity-Relationship Diagram
+    %% =====================================================================
+
+    %% Existing table: users (created in src/db/migrations/001_initial_schema.ts)
+    %% Preserved columns and types: id serial PK, email varchar(255) UK, name varchar(255) nullable, created_at timestamp default now()
+    users {
+        serial id PK "Existing: auto-generated primary key"
+        varchar(255) email UK "Existing: NOT NULL, unique"
+        varchar(255) name "Existing: NULL"
+        timestamp created_at "Existing: NOT NULL, DEFAULT NOW()"
+    }
+
+    %% Borrowers profile entity (optional one-to-one with users)
+    borrowers {
+        int id PK "auto-increment, primary key"
+        int user_id FK, UK "NOT NULL, unique, ON DELETE CASCADE"
+        string membership_number UK "NOT NULL, unique"
+    }
+
+    %% Genres entity (one-to-many with books)
+    genres {
+        int id PK "auto-increment, primary key"
+        string name UK "NOT NULL, unique"
+    }
+
+    %% Books entity (physical copy)
+    books {
+        int id PK "auto-increment, primary key"
+        int genre_id FK "NOT NULL, ON DELETE CASCADE"
+        string title "NOT NULL"
+        string barcode UK "NOT NULL, unique"
+    }
+
+    %% Authors entity
+    authors {
+        int id PK "auto-increment, primary key"
+        string name "NOT NULL"
+    }
+
+    %% Many-to-many junction entity between books and authors
+    book_authors {
+        int book_id PK, FK "NOT NULL, ON DELETE CASCADE"
+        int author_id PK, FK "NOT NULL, ON DELETE CASCADE"
+    }
+
+    %% Loans entity representing book borrowings over time
+    loans {
+        int id PK "auto-increment, primary key"
+        int borrower_id FK "NOT NULL, ON DELETE CASCADE"
+        int book_id FK "NOT NULL, ON DELETE CASCADE"
+        date loan_date "NOT NULL"
+        date due_date "NOT NULL"
+        date returned_date "NULL"
+    }
+
+    %% Relationships and Cardinalities
+    users ||--o| borrowers : "has profile"
+    genres ||--o{ books : "categorizes"
+    books ||--o{ book_authors : "has"
+    authors ||--o{ book_authors : "writes"
+    borrowers ||--o{ loans : "borrows"
+    books ||--o{ loans : "loaned_in"
